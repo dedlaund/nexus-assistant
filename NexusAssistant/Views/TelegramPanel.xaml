@@ -1,0 +1,42 @@
+<UserControl x:Class="NexusAssistant.Views.TelegramPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,0,12,22">
+            <TextBlock Text="Управление ПК" Style="{StaticResource Heading}"/>
+            <TextBlock Text="Подключите личного Telegram-бота, чтобы управлять компьютером с телефона." Style="{StaticResource Caption}" Margin="0,7,0,18"/>
+            <ToggleButton x:Name="StartupSwitch" Content="Запускать NEXUS при входе в Windows" Style="{StaticResource Switch}"
+                          Click="Startup_Click" Margin="0,0,0,5"/>
+            <TextBlock x:Name="StartupStatus" Text="При автозапуске NEXUS открывается в области уведомлений Windows."
+                       Style="{StaticResource Caption}" Margin="0,0,0,16"/>
+            <Border Style="{StaticResource EditorSurface}" Padding="17" Margin="0,0,0,17">
+                <StackPanel>
+                    <TextBlock Text="Telegram-бот" FontSize="18" FontWeight="SemiBold"/>
+                    <TextBlock Text="Создайте бота командой /newbot в @BotFather. Вставьте выданный токен сюда." Style="{StaticResource Caption}" Margin="0,6,0,8"/>
+                    <PasswordBox x:Name="TokenBox" IsEnabled="{Binding CanConfigure}" Height="35" Padding="8,5" MaxLength="140"
+                                 Foreground="{StaticResource Ink}" Background="#0E1015" BorderBrush="#35FFFFFF" AutomationProperties.Name="Токен бота BotFather"/>
+                    <TextBlock Text="{Binding Status}" Foreground="{StaticResource Accent}" TextWrapping="Wrap" Margin="0,10,0,4"/>
+                    <TextBlock Text="{Binding BotName}" Style="{StaticResource Caption}"/>
+                    <TextBlock Text="{Binding PairStatus}" Style="{StaticResource Caption}" Margin="0,4,0,0"/>
+                    <TextBox Text="{Binding PairInstruction, Mode=OneWay}" IsReadOnly="True" Style="{StaticResource Field}"
+                             Foreground="{StaticResource Accent}" TextWrapping="Wrap" Padding="0,4" Margin="0,3,0,0"
+                             Visibility="{Binding PairInstruction, Converter={x:Static view:NoticeVisibility.Instance}}" xmlns:view="clr-namespace:NexusAssistant.Views"/>
+                    <WrapPanel Margin="0,9,0,0">
+                        <Button Content="Подключить" Style="{StaticResource Primary}" IsEnabled="{Binding CanConfigure}" Click="Connect_Click"/>
+                        <Button Content="Выключить" Style="{StaticResource Quiet}" IsEnabled="{Binding CanStop}" Click="Stop_Click"/>
+                        <Button Content="Новый код" Style="{StaticResource Quiet}" IsEnabled="{Binding CanPair}" Click="Pair_Click"/>
+                        <Button Content="Отвязать телефон" Style="{StaticResource Quiet}" IsEnabled="{Binding CanRevoke}" Click="Revoke_Click"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+            <TextBlock Text="Приложения для запуска" FontSize="18" FontWeight="SemiBold"/>
+            <TextBlock Text="По одному приложению на строку. Например, Dota 2 = C:\Games\Dota 2\dota2.exe. Изменения применяются при подключении." Style="{StaticResource Caption}" Margin="0,7,0,8"/>
+            <Border Style="{StaticResource EditorSurface}">
+                <TextBox x:Name="AppsBox" IsEnabled="{Binding CanConfigure}" MinHeight="100" MaxHeight="165" MaxLength="12000" AcceptsReturn="True"
+                         Style="{StaticResource Field}" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Разрешённые приложения"/>
+            </Border>
+            <Button Content="Выбрать .exe…" Style="{StaticResource Quiet}" HorizontalAlignment="Left" IsEnabled="{Binding CanConfigure}" Click="PickApp_Click"/>
+            <TextBlock Text="Снимки основного экрана и названия открытых окон передаются в личный чат по запросу привязанного аккаунта. При закрытии окна с включённым ботом NEXUS остаётся в области уведомлений." Style="{StaticResource Caption}" Margin="0,8,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

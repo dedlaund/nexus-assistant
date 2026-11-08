@@ -1,0 +1,99 @@
+<UserControl x:Class="NexusAssistant.Views.CommandEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:services="clr-namespace:NexusAssistant.Services">
+    <UserControl.Resources>
+        <Style x:Key="EditorLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+            <Setter Property="Margin" Value="0,0,0,7"/>
+        </Style>
+    </UserControl.Resources>
+    <StackPanel>
+        <Border Background="#101116" BorderBrush="#1FFFFFFF" BorderThickness="1" CornerRadius="16" Padding="20,18" Margin="0,0,0,18">
+            <StackPanel IsEnabled="{Binding CanEditCommands}">
+                <TextBlock x:Name="EditorTitle" Text="Новая команда" FontSize="20" FontWeight="SemiBold"/>
+                <TextBlock Text="Задайте фразу и действие. Команду можно написать в чате или произнести в микрофон."
+                           Style="{StaticResource Caption}" FontSize="13" Margin="0,6,0,19"/>
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="16"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Фраза" Style="{StaticResource EditorLabel}"/>
+                        <Border Style="{StaticResource EditorSurface}">
+                            <TextBox x:Name="PhraseBox" Style="{StaticResource Field}" FontSize="15" MinHeight="38"
+                                     MaxLength="100" AutomationProperties.Name="Фраза команды" ToolTip="Например, Привет"/>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Действие" Style="{StaticResource EditorLabel}"/>
+                        <ComboBox x:Name="ActionBox" ItemsSource="{x:Static services:CustomCommands.Options}"
+                                  SelectionChanged="Action_Changed" Style="{StaticResource EditorChoice}" AutomationProperties.Name="Действие команды">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate><TextBlock Text="{Binding Label}"/></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+                <TextBlock x:Name="TargetLabel" Style="{StaticResource EditorLabel}" Margin="0,16,0,7"/>
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource EditorSurface}">
+                        <TextBox x:Name="TargetBox" Style="{StaticResource Field}" FontSize="15" MinHeight="38" MaxLength="2000"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=TargetLabel}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" x:Name="Pickers" Orientation="Horizontal" Margin="8,0,0,0">
+                        <Button Style="{StaticResource Quiet}" Click="PickFile_Click" Content="Файл…" AutomationProperties.Name="Выбрать файл"/>
+                        <Button Style="{StaticResource Quiet}" Click="PickFolder_Click" Content="Папка…" AutomationProperties.Name="Выбрать папку"/>
+                    </StackPanel>
+                </Grid>
+                <TextBlock x:Name="TargetHint" Style="{StaticResource Caption}" Margin="0,7,0,14"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="SaveButton" Style="{StaticResource Primary}" Click="Save_Click" Content="Добавить команду"/>
+                    <Button x:Name="CancelEditButton" Style="{StaticResource Quiet}" Click="CancelEdit_Click" Content="Отмена" Margin="6,0,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <TextBlock Text="Сохранённые команды" FontSize="19" FontWeight="SemiBold" Margin="0,1,0,9"/>
+        <TextBlock Text="Здесь появятся ваши команды." Margin="0,0,0,15">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasItems, ElementName=SavedList}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <ItemsControl x:Name="SavedList" ItemsSource="{Binding UserCommands}" IsEnabled="{Binding CanEditCommands}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderThickness="0,0,0,1" BorderBrush="#18FFFFFF" Padding="0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,2,12,2">
+                                <TextBlock Text="{Binding Phrase}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding ActionLabel}" Style="{StaticResource Caption}" Foreground="{StaticResource Accent}" Margin="0,4,0,1"/>
+                                <TextBlock Text="{Binding Target}" TextTrimming="CharacterEllipsis" Foreground="{StaticResource Muted}" ToolTip="{Binding Target}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Tag="{Binding}" Content="Изменить" Click="Edit_Click" Style="{StaticResource Quiet}"/>
+                                <Button Tag="{Binding}" Content="Удалить" Click="Delete_Click" Style="{StaticResource Quiet}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Border x:Name="DeletePrompt" Style="{StaticResource EditorSurface}" Visibility="Collapsed" Margin="0,8,0,0" Padding="10"
+                IsEnabled="{Binding CanEditCommands}">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{StaticResource Primary}" Click="ConfirmDelete_Click" Content="Удалить"/>
+                <Button DockPanel.Dock="Right" Style="{StaticResource Quiet}" Click="CancelDelete_Click" Content="Отмена" Margin="4,0"/>
+                <TextBlock x:Name="DeleteMessage" TextWrapping="Wrap" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

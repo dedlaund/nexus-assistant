@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="NexusAssistant/NexusAssistant.csproj" />
+  <Project Path="NexusAssistant.Tests/NexusAssistant.Tests.csproj" />
+</Solution>

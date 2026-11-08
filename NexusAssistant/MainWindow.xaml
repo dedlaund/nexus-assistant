@@ -1,0 +1,262 @@
+<Window x:Class="NexusAssistant.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        xmlns:view="clr-namespace:NexusAssistant.Views"
+        Title="NEXUS Assistant" Icon="Assets/Nexus.ico" Width="1160" Height="790" MinWidth="800" MinHeight="650"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Background="#08090C" Foreground="{StaticResource Ink}" FontFamily="Segoe UI"
+        FontSize="14" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="58" CornerRadius="14" GlassFrameThickness="0" ResizeBorderThickness="6"/>
+    </shell:WindowChrome.WindowChrome>
+    <Window.Resources>
+        <DataTemplate x:Key="Message">
+            <Grid Margin="1,0,1,20">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="75"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,2,12,0">
+                    <TextBlock Text="{Binding Author}" Style="{StaticResource Caption}" Foreground="{StaticResource Accent}"/>
+                    <TextBlock Text="{Binding Clock}" Style="{StaticResource Caption}" Margin="0,4,0,0"/>
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding Text}" TextWrapping="Wrap" LineHeight="23" FontSize="15"/>
+                <Button Grid.Column="2" Tag="{Binding Text}" Click="Copy_Click" ToolTip="Копировать сообщение"
+                        AutomationProperties.Name="Копировать сообщение" Style="{StaticResource Quiet}" Padding="8,5"
+                        Margin="10,0,0,0" VerticalAlignment="Top">
+                    <TextBlock Text="&#xE8C8;" Style="{StaticResource Icon}" FontSize="13"/>
+                </Button>
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border x:Name="Frame" Background="#08090C" BorderBrush="#2AFFFFFF" BorderThickness="1" CornerRadius="13"
+            RenderOptions.ClearTypeHint="Enabled" TextElement.Foreground="{StaticResource Ink}">
+        <Grid>
+            <Grid.RowDefinitions><RowDefinition Height="59"/><RowDefinition/></Grid.RowDefinitions>
+            <Grid Margin="23,0,11,0">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Left">
+                    <Grid Width="26" Height="25" Margin="0,0,10,0">
+                        <Ellipse Width="16" Height="16" Stroke="#D7AC78" StrokeThickness="1"/>
+                        <Ellipse Width="24" Height="7" Stroke="#F2D7AB" StrokeThickness="1" RenderTransformOrigin=".5,.5">
+                            <Ellipse.RenderTransform><RotateTransform Angle="-21"/></Ellipse.RenderTransform>
+                        </Ellipse>
+                    </Grid>
+                    <TextBlock Text="N E X U S" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13"/>
+                    <RadioButton GroupName="Pages" Tag="Remote" Checked="Navigate" Style="{StaticResource Nav}" Content="Управление ПК"
+                                 FontSize="12" Margin="4,0,0,0" shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <RadioButton x:Name="HomeNav" GroupName="Pages" Tag="Home" Checked="Navigate" IsChecked="True" Style="{StaticResource Nav}" Content="Главная"/>
+                    <RadioButton x:Name="ChatNav" GroupName="Pages" Tag="Chat" Checked="Navigate" Style="{StaticResource Nav}" Content="Чат"/>
+                    <RadioButton GroupName="Pages" Tag="Commands" Checked="Navigate" Style="{StaticResource Nav}" Content="Команды"/>
+                    <RadioButton GroupName="Pages" Tag="History" Checked="Navigate" Style="{StaticResource Nav}" Content="История"/>
+                    <RadioButton x:Name="SettingsNav" GroupName="Pages" Tag="Settings" Checked="Navigate" Style="{StaticResource Nav}" Content="Настройки"/>
+                    <RadioButton GroupName="Pages" Tag="Tools" Checked="Navigate" Style="{StaticResource Nav}" Content="Инструменты ПК"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button Style="{StaticResource Quiet}" Click="QuickInput_Click" ToolTip="Быстрый ввод" AutomationProperties.Name="Быстрый ввод">
+                        <TextBlock Text="&#xE765;" Style="{StaticResource Icon}" FontSize="14"/>
+                    </Button>
+                    <Button Style="{StaticResource Quiet}" Click="Minimize_Click" ToolTip="Свернуть" AutomationProperties.Name="Свернуть">
+                        <TextBlock Text="&#xE921;" Style="{StaticResource Icon}" FontSize="10"/>
+                    </Button>
+                    <Button x:Name="MaximizeButton" Style="{StaticResource Quiet}" Click="Maximize_Click" ToolTip="Развернуть" AutomationProperties.Name="Развернуть или восстановить">
+                        <TextBlock x:Name="MaximizeIcon" Text="&#xE922;" Style="{StaticResource Icon}" FontSize="10"/>
+                    </Button>
+                    <Button Style="{StaticResource Quiet}" Click="Close_Click" ToolTip="Закрыть" AutomationProperties.Name="Закрыть">
+                        <TextBlock Text="&#xE8BB;" Style="{StaticResource Icon}" FontSize="10"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <Grid x:Name="Workspace" Grid.Row="1">
+                <Grid.RowDefinitions><RowDefinition/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <Grid x:Name="ContentArea">
+                    <Grid Visibility="{Binding ShowHome, Converter={StaticResource VisibleIf}}" ClipToBounds="True">
+                        <view:CosmicField x:Name="Cosmos" Mode="{Binding State}" Audio="{Binding AudioLevel}" Margin="0,43,0,5" IsHitTestVisible="False"
+                                          AutomationProperties.Name="Анимированная чёрная дыра с аккреционным диском"/>
+                        <StackPanel x:Name="HeroTitle" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,18,0,0">
+                            <TextBlock Text="N E X U S   A S S I S T A N T" Style="{StaticResource Caption}" FontSize="12"
+                                       Foreground="{StaticResource Accent}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding Greeting}" FontFamily="Segoe UI Light" FontSize="26" Opacity="0.65" Foreground="{StaticResource Ink}"
+                                       HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,12">
+                            <Ellipse Width="5" Height="5" Margin="0,0,8,0" Style="{StaticResource Signal}"/>
+                            <TextBlock Text="{Binding StatusDetail}" Style="{StaticResource Caption}" Foreground="{StaticResource Muted}"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="38,32,38,0" MaxWidth="820">
+                        <Border Visibility="{Binding ShowRemote, Converter={StaticResource VisibleIf}}">
+                            <view:TelegramPanel x:Name="RemotePanel"/>
+                        </Border>
+                        <Border Visibility="{Binding ShowTools, Converter={StaticResource VisibleIf}}">
+                            <view:PcToolsPanel x:Name="PcPanel"/>
+                        </Border>
+                        <Grid Visibility="{Binding ShowConversation, Converter={StaticResource VisibleIf}}">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition/></Grid.RowDefinitions>
+                            <DockPanel Margin="0,0,0,26">
+                                <Button DockPanel.Dock="Right" Style="{StaticResource Quiet}" Click="ConfirmClear_Click" Content="Очистить историю"
+                                        IsEnabled="{Binding CanClear}" Visibility="{Binding ShowHistory, Converter={StaticResource VisibleIf}}"/>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
+                                            Visibility="{Binding ShowComposer, Converter={StaticResource VisibleIf}}">
+                                    <Ellipse Width="5" Height="5" Margin="0,0,8,0" Style="{StaticResource Signal}"/>
+                                    <TextBlock Text="{Binding StatusDetail}" Style="{StaticResource Caption}" AutomationProperties.LiveSetting="Polite"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding PageTitle}" Style="{StaticResource Heading}"/>
+                            </DockPanel>
+                            <Border Grid.Row="1" x:Name="ClearConfirmation" Visibility="Collapsed" Background="#171418" Padding="12" CornerRadius="10" Margin="0,0,0,20">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource Primary}" Click="Clear_Click" Content="Очистить" Margin="6,0,0,0"/>
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource Quiet}" Click="CancelClear_Click" Content="Отмена"/>
+                                    <TextBlock Text="Удалить все сообщения?" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </Border>
+                            <ScrollViewer Grid.Row="2" x:Name="ChatScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding Messages}" ItemTemplate="{StaticResource Message}" Margin="0,0,9,0"/>
+                            </ScrollViewer>
+                            <TextBlock Grid.Row="2" Text="Здесь появятся ваши сообщения и ответы ассистента." Foreground="{StaticResource Muted}"
+                                       TextWrapping="Wrap" IsHitTestVisible="False" Visibility="{Binding Empty, Converter={StaticResource VisibleIf}}"/>
+                        </Grid>
+
+                        <ScrollViewer Visibility="{Binding ShowCommands, Converter={StaticResource VisibleIf}}" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,10,16">
+                                <TextBlock Text="Команды" Style="{StaticResource Heading}"/>
+                                <TextBlock Text="Создайте свою команду или выберите готовый пример." Style="{StaticResource Caption}" FontSize="13" Margin="0,9,0,19"/>
+                                <view:CommandEditor/>
+                                <Rectangle Height="1" Fill="#1AFFFFFF" Margin="0,15,0,19"/>
+                                <TextBlock Text="Встроенные команды" FontSize="19" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                <ItemsControl ItemsSource="{Binding Examples}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource Quiet}" Tag="{Binding Example}" Click="Example_Click"
+                                                    Margin="-9,0,0,2" Padding="9,9" HorizontalContentAlignment="Stretch">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="89"/><ColumnDefinition Width="175"/><ColumnDefinition/><ColumnDefinition Width="22"/></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Category}" Style="{StaticResource Caption}" Foreground="{StaticResource Accent}" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding Example}" Foreground="{StaticResource Muted}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="3" Text="&#xE72A;" Style="{StaticResource Icon}" FontSize="11" HorizontalAlignment="Right"/>
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <ScrollViewer Visibility="{Binding ShowSettings, Converter={StaticResource VisibleIf}}" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,12,20">
+                                <TextBlock Text="Настройки" Style="{StaticResource Heading}" Margin="0,0,0,28"/>
+                                <StackPanel IsEnabled="{Binding CanEdit}">
+                                    <TextBlock Text="Локальный профиль" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                    <DockPanel Margin="0,0,0,20">
+                                        <Border DockPanel.Dock="Left" Width="46" Height="46" CornerRadius="23" Background="#2CE9C393" Margin="0,0,12,0">
+                                            <TextBlock Text="{Binding ProfileInitial}" Foreground="{StaticResource Accent}" FontSize="20"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel>
+                                            <TextBlock Text="Имя для приветствия на главной" Style="{StaticResource Caption}" Margin="0,0,0,4"/>
+                                            <Border Style="{StaticResource EditorSurface}" MaxWidth="380" HorizontalAlignment="Left" MinWidth="240">
+                                                <TextBox Text="{Binding ProfileName, UpdateSourceTrigger=PropertyChanged}" MaxLength="32" Style="{StaticResource Field}"
+                                                         Height="34" AutomationProperties.Name="Имя профиля"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </DockPanel>
+                                    <TextBlock Text="Браузер для команд" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                    <TextBlock Text="Для сайтов, поиска и Яндекс Музыки. Команда с названием браузера открывает указанный браузер." Style="{StaticResource Caption}" Margin="0,0,0,8"/>
+                                    <ComboBox ItemsSource="{Binding BrowserOptions}" SelectedValuePath="Value" SelectedValue="{Binding Browser, Mode=TwoWay}"
+                                              Style="{StaticResource EditorChoice}" AutomationProperties.Name="Браузер для команд" Margin="0,0,0,18"
+                                              HorizontalAlignment="Left" Width="290">
+                                        <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Label}"/></DataTemplate></ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBlock Text="Интерфейс и голос" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                                    <ToggleButton Content="Вступительная анимация" IsChecked="{Binding Intro}" Style="{StaticResource Switch}" Click="Switch_Click"/>
+                                    <ToggleButton Content="Озвучивать ответы по-русски" IsChecked="{Binding Speak}" Style="{StaticResource Switch}" Click="Switch_Click"/>
+                                    <ToggleButton Content="Звуки переключателей" IsChecked="{Binding ClickSounds}" Style="{StaticResource Switch}" Click="SoundSwitch_Click"/>
+                                    <TextBlock Text="Для голосового ввода нужен распознаватель Windows ru-RU или локальный Whisper." Style="{StaticResource Caption}" Margin="0,10,0,0"/>
+                                    <Rectangle Height="1" Fill="#1AFFFFFF" Margin="0,25"/>
+                                    <TextBlock Text="Локальный диалог" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Имя загруженной модели Ollama" Style="{StaticResource Caption}" Margin="0,0,0,8"/>
+                                    <Border Background="#101116" CornerRadius="10" Padding="10,4" HorizontalAlignment="Left" Width="345">
+                                        <TextBox Text="{Binding Model, UpdateSourceTrigger=PropertyChanged}" MaxLength="150" Style="{StaticResource Field}"
+                                                 AutomationProperties.Name="Имя модели Ollama" Height="34"/>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="{Binding DataLocation}" Style="{StaticResource Caption}" Margin="0,22,0,12"/>
+                                <Button Content="Сохранить настройки" Style="{StaticResource Primary}" Click="Save_Click"
+                                        IsEnabled="{Binding CanEdit}" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="45,0,45,10" MaxWidth="700">
+                    <TextBlock Text="{Binding LatestReply}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" TextAlignment="Center"
+                               MaxHeight="45" LineHeight="21" Foreground="{StaticResource Muted}" FontSize="14">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ShowHome}" Value="True"/>
+                                            <Condition Binding="{Binding Notice}" Value=""/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" TextAlignment="Center" Foreground="{StaticResource Accent}"
+                               Visibility="{Binding Notice, Converter={x:Static view:NoticeVisibility.Instance}}" AutomationProperties.LiveSetting="Polite"/>
+                </Grid>
+
+                <StackPanel Grid.Row="2" Margin="32,0,32,20" MaxWidth="674" Visibility="{Binding ShowComposer, Converter={StaticResource VisibleIf}}">
+                    <Border Background="#CA17171D" BorderBrush="#28FFFFFF" BorderThickness="1" CornerRadius="26" Padding="10,6,6,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <Grid>
+                                <TextBox x:Name="InputBox" Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Field}"
+                                         Height="38" MaxLength="3000" Padding="11,6" FontSize="15" PreviewKeyDown="Input_KeyDown"
+                                         TextOptions.TextFormattingMode="Display"
+                                         AutomationProperties.Name="Введите сообщение или команду"/>
+                                <TextBlock Text="Что сделать?" VerticalAlignment="Center" Margin="11,0,0,0" IsHitTestVisible="False" Foreground="{StaticResource Muted}" FontSize="15">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers><DataTrigger Binding="{Binding HasInput}" Value="False"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                            <Button Grid.Column="1" Click="Mic_Click" IsEnabled="{Binding CanListen}" Margin="2,0,6,0" Width="38" Padding="0"
+                                    ToolTip="Микрофон · повторное нажатие отменяет голосовой ввод" AutomationProperties.Name="Начать или отменить голосовой ввод">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource Quiet}">
+                                        <Style.Triggers><DataTrigger Binding="{Binding Listening}" Value="True">
+                                            <Setter Property="Background" Value="#2CE9BB81"/>
+                                            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                        </DataTrigger></Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <TextBlock Text="&#xE720;" Style="{StaticResource Icon}"/>
+                            </Button>
+                            <Button Grid.Column="2" Style="{StaticResource Primary}" Click="Send_Click" IsEnabled="{Binding CanSend}" Width="38" Padding="0"
+                                    ToolTip="Отправить · Enter" AutomationProperties.Name="Отправить сообщение">
+                                <TextBlock Text="&#xE74A;" Style="{StaticResource Icon}" FontSize="15"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <TextBlock Text="Enter — отправить   ·   Микрофон — голосовой ввод" Style="{StaticResource Caption}" HorizontalAlignment="Center" Margin="0,9,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

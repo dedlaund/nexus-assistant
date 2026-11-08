@@ -1,0 +1,104 @@
+<Window x:Class="NexusAssistant.Views.QuickInputWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NEXUS · Быстрый ввод" WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
+        Topmost="True" ShowInTaskbar="False" Background="Transparent" Width="616" SizeToContent="Height"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"
+        PreviewKeyDown="Window_KeyDown">
+    <Window.Resources>
+        <Style x:Key="KeyLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="18,12,18,22">
+        <Border CornerRadius="21" IsHitTestVisible="False" BorderThickness="1">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1B1719" Offset="0"/>
+                    <GradientStop Color="#141316" Offset=".49"/>
+                    <GradientStop Color="#101013" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#84664A" Offset="0"/>
+                    <GradientStop Color="#4C3C33" Offset=".4"/>
+                    <GradientStop Color="#333037" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="22" Opacity=".62" ShadowDepth="6" Direction="270" RenderingBias="Performance"/>
+            </Border.Effect>
+        </Border>
+        <StackPanel Margin="16,12,16,13">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="58"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="22"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                <Image x:Name="Brand" Grid.RowSpan="2" Width="58" Height="58" RenderOptions.BitmapScalingMode="HighQuality"
+                       AutomationProperties.Name="Логотип NEXUS">
+                    <Image.Clip><RectangleGeometry Rect="0,0,58,58" RadiusX="13" RadiusY="13"/></Image.Clip>
+                </Image>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="N E X U S" FontSize="11" FontWeight="SemiBold" Foreground="#F1CD9D"/>
+                    <Ellipse Fill="#8A6A51" Width="3" Height="3" Margin="10,0,9,0"/>
+                    <TextBlock Text="БЫСТРЫЙ ВВОД" FontSize="10" FontWeight="SemiBold" Foreground="#B8ABB2"/>
+                </StackPanel>
+                <Button Grid.Column="3" Style="{StaticResource Quiet}" Click="Dismiss_Click" ToolTip="Закрыть быстрый ввод"
+                        AutomationProperties.Name="Закрыть быстрый ввод" HorizontalAlignment="Right" Padding="7,1">
+                    <TextBlock Text="Esc" Style="{StaticResource KeyLabel}"/>
+                </Button>
+                <Grid Grid.Row="1" Grid.Column="2" Margin="0,0,13,0">
+                    <TextBox x:Name="Query" Style="{StaticResource Field}" FontSize="20" Padding="0" MaxLength="4000"
+                             AutomationProperties.Name="Введите запрос" VerticalAlignment="Stretch"/>
+                    <TextBlock Text="Введите запрос…" IsHitTestVisible="False" VerticalAlignment="Center" FontSize="20"
+                               Foreground="#E9DFE6" Opacity=".61">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=Query}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+                <Button Grid.Row="1" Grid.Column="3" Click="Send_Click" AutomationProperties.Name="Отправить запрос"
+                        VerticalAlignment="Center" ToolTip="Отправить запрос">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource Quiet}">
+                            <Setter Property="Foreground" Value="#F1CD9D"/>
+                            <Setter Property="Background" Value="#30241E"/>
+                            <Setter Property="Padding" Value="12,6"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=Query}" Value="">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Enter" Style="{StaticResource KeyLabel}"/>
+                        <Path Data="M 10,1 L 10,6 L 1,6 M 1,6 L 4,3 M 1,6 L 4,9" Margin="7,0,0,0"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.1"
+                              StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+            <Border x:Name="ResultArea" Visibility="Collapsed" Margin="73,9,0,0" Padding="0,9,0,2"
+                    BorderBrush="#40343A" BorderThickness="0,1,0,0">
+                <TextBlock x:Name="Result" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="116"
+                           LineHeight="21" Foreground="{StaticResource Ink}" AutomationProperties.LiveSetting="Polite"/>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>
